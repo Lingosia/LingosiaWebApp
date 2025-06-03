@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Sign Up - Lingosia</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header id="main-header"></header>
+    <div class="container">
+        <div class="login-section login-centered">
+            <h2>Sign Up</h2>
+            <form id="signup-form">
+                <label>
+                    Username:<br>
+                    <input type="text" id="signup-username" required>
+                </label>
+                <br><br>
+                <label>
+                    Password:<br>
+                    <input type="password" id="signup-password" required>
+                </label>
+                <br><br>
+                <label>
+                    Confirm Password:<br>
+                    <input type="password" id="signup-password-confirm" required>
+                </label>
+                <br><br>
+                <label>
+                    Email:<br>
+                    <input type="email" id="signup-email" required>
+                </label>
+                <br><br>
+                <label>
+                    Chosen Language:<br>
+                    <select id="signup-language" required>
+                        <option value="">Select a language</option>
+                        <option value="danish">Danish</option>
+                        <option value="english">English</option>
+                        <option value="japanese">Japanese</option>
+                        <option value="chinese">Chinese</option>
+                        <option value="spanish">Spanish</option>
+                        <option value="french">French</option>
+                        <!-- Add more as needed -->
+                    </select>
+                </label>
+                <br><br>
+                <button type="submit" class="dict-btn">Sign Up</button>
+            </form>
+            <div class="signup-link" style="margin-top:1em;">
+                <a href="user_login">Already have an account? Login</a>
+            </div>
+        </div>
+    </div>
+    <footer id="main-footer"></footer>
+
+    <script src="header.js"></script>
+    <script src="footer.js"></script>
+    <script>
+        async function sha256(str) {
+            const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
+            return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
+        }
+
+        function isValidEmail(email) {
+            // Simple regex for email validation
+            return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+        }
+
+        document.getElementById('signup-form').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const username = document.getElementById('signup-username').value.trim();
+            const password = document.getElementById('signup-password').value;
+            const confirm = document.getElementById('signup-password-confirm').value;
+            const email = document.getElementById('signup-email').value.trim();
+            const language = document.getElementById('signup-language').value;
+
+            if (password !== confirm) {
+                alert('Passwords do not match.');
+                return;
+            }
+            if (!isValidEmail(email)) {
+                alert('Invalid email address.');
+                return;
+            }
+            if (!language) {
+                alert('Please select a language.');
+                return;
+            }
+
+            const hash = await sha256(password);
+
+            fetch('/api/signup', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    username,
+                    email,
+                    passwordHash: hash,
+                    language
+                })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    // Store username, sessionToken, and language in cookies
+                    document.cookie = `username=${encodeURIComponent(data.username)}; path=/;`;
+                    document.cookie = `sessionToken=${encodeURIComponent(data.sessionToken)}; path=/;`;
+                    document.cookie = `language=${encodeURIComponent(language)}; path=/;`;
+                    window.location.href = 'article_list';
+                } else {
+                    alert(data.error || 'Signup failed.');
+                }
+            })
+            .catch(() => alert('Signup failed.'));
+        });
+    </script>
+</body>
+</html>

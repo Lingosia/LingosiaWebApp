@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Lingosia</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .home-flex-row {
+            padding-top: 5em;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
+        }
+
+        .book-icon {
+            line-height: 1;
+            margin-left: 40px;
+            /* Optionally, prevent shrinking */
+            flex-shrink: 0;
+            padding: 2em;
+            width: 25%;
+        }
+    </style>
+</head>
+<body>
+    <header id="main-header"></header>
+    <div class="container">
+        <div class="home-flex-row">
+            <div class="home-container">
+                <h2>Learn languages faster by reading what you love.</h2>
+                <p>Import any text, get support for unfamiliar words, and systematically build your vocabulary and comprehension.</p>
+            </div>
+            <div class="book-icon"><img src = "./Book_designed_by_Benny_Forsberg_from_the_Noun_Project_-_with_lines-small.png" width="200px" height="200px"></img></div>
+        </div>
+    </div>
+    <button class="login-btn" style = "border: 0px; margin-left: 2em; cursor: pointer;" onclick="window.location.href='user_signup_guest'">Try it now - Guest Account</button>
+    
+    <footer id="main-footer"></footer>
+
+    <script src="header.js"></script>
+    <script src="footer.js"></script>
+    <script>
+        function getCookie(name) {
+            const value = `; ${document.cookie}`;
+            const parts = value.split(`; ${name}=`);
+            if (parts.length === 2) return parts.pop().split(';').shift();
+            return null;
+        }
+        if (getCookie('username')) {
+            window.location.href = 'article_list';
+        }
+    </script>
+</body>
+</html>

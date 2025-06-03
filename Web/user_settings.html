@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Settings - Lingosia</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header id="main-header"></header>
+    <div id = "settings-container">
+            <h2>Settings</h2>
+            <form id="settings-form">
+                <label>
+                    Chosen Language:<br>
+                    <select id="settings-language">
+                        <option value="">Select a language</option>
+                        <option value="danish">Danish</option>
+                        <option value="english">English</option>
+                        <option value="japanese">Japanese</option>
+                        <option value="chinese">Chinese</option>
+                        <option value="spanish">Spanish</option>
+                        <option value="french">French</option>
+                        <!-- Add more as needed -->
+                    </select>
+                </label>
+                <br><br>
+                <button type="button" class="dict-btn" id="logout-btn">Logout</button>
+            </form>
+    </div>
+    <footer id="main-footer"></footer>
+
+    <script src="header.js"></script>
+    <script src="footer.js"></script>
+    <script>
+        // Prefill username/email from cookies or localStorage if available
+        function getCookie(name) {
+            const value = `; ${document.cookie}`;
+            const parts = value.split(`; ${name}=`);
+            if (parts.length === 2) return parts.pop().split(';').shift();
+            return null;
+        }
+
+        // Set language select from cookie
+        document.getElementById('settings-language').value = getCookie('language') || '';
+
+        document.getElementById('settings-language').addEventListener('change', function() {
+            
+            // Send API request to update language preference
+            fetch('/api/updateLanguage', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    username: getCookie('username'),
+                    sessionToken: getCookie('sessionToken'),
+                    language: this.value
+                })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    //Refresh the page to apply new language settings
+                    document.cookie = `language=${encodeURIComponent(this.value)}; path=/;`;
+                    if (data.dictionary) {
+                        localStorage.setItem(this.value, JSON.stringify(data.dictionary));
+                    }
+                    window.location.reload();
+                } else {
+                    console.error('Failed to update language:', data.error);
+                }
+            })
+            .catch(err => console.error('Error updating language:', err));
+        });
+
+        document.getElementById('logout-btn').addEventListener('click', function() {
+            document.cookie = 'username=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC;';
+            document.cookie = 'sessionToken=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC;';
+            document.cookie = 'language=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC;';
+            window.location.href = 'index';
+        });
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Create New Article - Lingosia</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header id="main-header"></header>
+    <div class="container">
+        <div class="article-new-section">
+            <h2>Create New Article</h2>
+            <form id="new-article-form">
+                <label>
+                    Title:<br>
+                    <input type="text" id="article-title" required>
+                </label>
+                <br><br>
+                <label>
+                    Language:<br>
+                    <select id="article-language" required>
+                        <option value="">Select a language</option>
+                        <option value="danish">Danish</option>
+                        <option value="english">English</option>
+                        <option value="japanese">Japanese</option>
+                        <option value="chinese">Chinese</option>
+                        <option value="spanish">Spanish</option>
+                        <option value="french">French</option>
+                        <!-- Add more as needed -->
+                    </select>
+                </label>
+                <br><br>
+                <label>
+                    Content:<br>
+                    <textarea id="article-content" rows="12" required></textarea>
+                </label>
+                <br><br>
+                <label>
+                    <input type="checkbox" id="article-public"> Make this article public
+                </label>
+                <br><br>
+                <button type="submit" class="dict-btn">Create Article</button>
+            </form>
+        </div>
+    </div>
+    <script src="header.js"></script>
+    <script>
+        function getCookie(name) {
+            const value = `; ${document.cookie}`;
+            const parts = value.split(`; ${name}=`);
+            if (parts.length === 2) return parts.pop().split(';').shift();
+            return null;
+        }
+
+        // Set default language from cookie
+        document.addEventListener('DOMContentLoaded', function() {
+            const lang = getCookie('language');
+            if (lang) {
+                document.getElementById('article-language').value = lang;
+            }
+        });
+
+        document.getElementById('new-article-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const username = getCookie('username');
+            const sessionToken = getCookie('sessionToken');
+            const title = document.getElementById('article-title').value.trim();
+            const content = document.getElementById('article-content').value;
+            const isPublic = document.getElementById('article-public').checked;
+            const language = document.getElementById('article-language').value;
+
+            fetch('/api/article/new', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    username,
+                    sessionToken,
+                    title,
+                    content,
+                    isPublic,
+                    language
+                })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success && data.id) {
+                    window.location.href = `article?id=${encodeURIComponent(data.id)}`;
+                } else {
+                    alert(data.error || 'Failed to create article.');
+                }
+            })
+            .catch(() => alert('Failed to create article.'));
+        });
+    </script>
+</body>
+</html>

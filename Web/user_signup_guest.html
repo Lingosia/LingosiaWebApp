@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Guest Signup - Lingosia</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header id="main-header"></header>
+    <div class="container">
+        <div class="login-section login-centered">
+            <h2 style="text-align: center;">Create Temporary Guest Account</h2>
+            <form id="guest-signup-form" class="guest-signup-form">
+                <label for="language">Choose your language:</label>
+                <select id="language" name="language" required>
+                    <option value="">Select a language</option>
+                    <option value="spanish">Spanish</option>
+                    <option value="french">French</option>
+                    <option value="german">German</option>
+                    <option value="italian">Italian</option>
+                    <option value="portuguese">Portuguese</option>
+                    <option value="russian">Russian</option>
+                    <option value="japanese">Japanese</option>
+                    <option value="chinese">Chinese</option>
+                    <option value="korean">Korean</option>
+                    <!-- Add more languages as needed -->
+                </select>
+                <button type="submit">Continue as Guest</button>
+                <div id="status"></div>
+            </form>
+        </div>
+    </div>
+    <footer id="main-footer"></footer>
+
+    <script src="header.js"></script>
+    <script src="footer.js"></script>
+    <script>
+        document.getElementById('guest-signup-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const language = document.getElementById('language').value;
+            if (!language) return;
+
+            fetch('/api/guest_signup', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ language })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    document.cookie = `username=${data.username}; path=/;`;
+                    document.cookie = `sessionToken=${data.sessionToken}; path=/;`;
+                    document.cookie = `language=${data.language}; path=/;`;
+                    window.location.href = 'article_list';
+                } else {
+                    document.getElementById('status').textContent = 'Signup failed. Please try again.';
+                }
+            })
+            .catch(() => {
+                document.getElementById('status').textContent = 'Signup failed. Please try again.';
+            });
+        });
+    </script>
+</body>
+</html>

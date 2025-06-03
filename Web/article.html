@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Lingosia</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header id="main-header"></header>
+    <div class="container">
+        <div class="article-section">
+            <div id="article"></div>
+        </div>
+        <div class="dictionary-section">
+            <div id="dictionary-word">Click a word to see it here</div>
+            <button id="dictionary-lookup" class="dict-btn">Translate</button>
+            <button id="dictcc-lookup" class="dict-btn">dict.cc</button>
+            <form id="user-translation-form">
+                <label>
+                    Your translation:<br>
+                    <input type="text" id="user-translation">
+                </label>
+                <br><br>
+                <label>
+                    Your understanding (0-5):<br>
+                    <input type="number" id="user-understanding" min="0" max="5">
+                </label>
+                <br><br>
+                <button type="submit" class="dict-btn">Save</button>
+            </form>
+            <form id="user-phrase-form">
+                <label>
+                    Save translation for phrase:<br>
+                    <input type="text" id="user-phrase-translation">
+                </label>
+                <br><br>
+                <label>
+                    Your understanding for phrase (0-5):<br>
+                    <input type="number" id="user-phrase-understanding" min="0" max="5">
+                </label>
+                <br><br>
+                <button type="submit" class="dict-btn">Save Phrase</button>
+            </form>
+            <!-- Additional dictionary info can go here -->
+        </div>
+    </div>
+    <script src="header.js"></script>
+    <script src="article.js"></script>
+    <script src="highlight.js"></script>
+    <script src="dictionary.js"></script>
+    <script>
+
+        // Get id from URL parameters
+        function getIdFromUrl() {
+            const params = new URLSearchParams(window.location.search);
+            return params.get('id');
+        }
+        var articleId = getIdFromUrl();
+
+        // Load article, then setup highlighting and dictionary UI
+        document.addEventListener('DOMContentLoaded', function() {
+            loadArticle(() => {
+                setupDictionaryUI();
+            }, articleId);
+        });
+    </script>
+</body>
+</html>

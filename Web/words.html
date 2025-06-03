@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Known Words - Lingosia</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header id="main-header"></header>
+    <div class="container">
+        <div class="login-section login-centered" style="max-width: 600px;">
+            <h2>Your Known Words</h2>
+            <ul id="known-words-list"></ul>
+        </div>
+    </div>
+    <script src="header.js"></script>
+    <script>
+        // Get known words from localStorage
+        function getKnownWords() {
+            try {
+                const data = JSON.parse(localStorage.getItem(getActiveLanguageKey()) || '{}');
+                return Object.entries(data)
+                    .filter(([word, obj]) => obj.understanding !== undefined && obj.understanding > 0)
+                    .map(([word, obj]) => ({
+                        word,
+                        translation: obj.translation || '',
+                        understanding: obj.understanding
+                    }));
+            } catch {
+                return [];
+            }
+        }
+
+        function renderKnownWords() {
+            const list = document.getElementById('known-words-list');
+            const words = getKnownWords();
+            if (words.length === 0) {
+                list.innerHTML = '<li><em>No known words yet.</em></li>';
+                return;
+            }
+            list.innerHTML = '';
+            words.sort((a, b) => b.understanding - a.understanding || a.word.localeCompare(b.word));
+            words.forEach(({ word, translation, understanding }) => {
+                const li = document.createElement('li');
+                li.innerHTML = `<strong>${word}</strong> 
+                    ${translation ? `- <span style="color:#555">${translation}</span>` : ''}
+                    <span style="float:right;color:#38b000;">${understanding}/5</span>`;
+                list.appendChild(li);
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', renderKnownWords);
+    </script>
+</body>
+</html>

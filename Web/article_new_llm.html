@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Automate New Article - Lingosia</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header id="main-header"></header>
+    <div class="container">
+        <div class="article-new-section login-centered" style="max-width:600px;">
+            <h2>Automate New Article</h2>
+            <form id="llm-article-form">
+                <label>
+                    Level:<br>
+                    <select id="llm-article-level" required>
+                        <option value="">Select a Level</option>
+                        <option value="A0">A0 - Early Learning</option>
+                        <option value="A1">A1 - Beginner</option>
+                        <option value="A2">A2 - Elementary</option>
+                        <option value="B1">B1 - Intermediate</option>
+                        <option value="B2">B2 - Upper Intermediate</option>
+                        <option value="C1">C1 - Advanced</option>
+                        <option value="C2">C2 - Proficiency</option>
+                        <!-- Add more as needed -->
+                    </select>
+                </label>
+                <br><br>
+                <label>
+                    Length:<br>
+                    <select id="llm-article-length" required>
+                        <option value="">Select a length</option>
+                        <option value="Short">Short</option>
+                        <option value="Medium">Medium</option>
+                        <option value="Long">Long</option>
+                        <option value="Essay">Essay</option>
+                        <!-- Add more as needed -->
+                    </select>
+                </label>
+                <br><br>
+                <label>
+                    Language:<br>
+                    <select id="llm-article-language" required>
+                        <option value="">Select a language</option>
+                        <option value="danish">Danish</option>
+                        <option value="english">English</option>
+                        <option value="japanese">Japanese</option>
+                        <option value="chinese">Chinese</option>
+                        <option value="spanish">Spanish</option>
+                        <option value="french">French</option>
+                        <!-- Add more as needed -->
+                    </select>
+                </label>
+                <br><br>
+                <label>
+                    Topic or Prompt:<br>
+                    <input type="text" id="llm-article-prompt" placeholder="e.g. A story about a cat" required>
+                </label>
+                <br><br>
+                <button type="submit" class="dict-btn">Generate Article</button>
+            </form>
+            <div id="llm-article-status" style="margin-top:1em;color:#14532d;"></div>
+        </div>
+    </div>
+    <script src="header.js"></script>
+    <script>
+        function getCookie(name) {
+            const value = `; ${document.cookie}`;
+            const parts = value.split(`; ${name}=`);
+            if (parts.length === 2) return parts.pop().split(';').shift();
+            return null;
+        }
+
+        // Set default language from cookie
+        document.addEventListener('DOMContentLoaded', function() {
+            const lang = getCookie('language');
+            if (lang) {
+                document.getElementById('llm-article-language').value = lang;
+            }
+        });
+
+        document.getElementById('llm-article-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const username = getCookie('username');
+            const sessionToken = getCookie('sessionToken');
+            const language = document.getElementById('llm-article-language').value;
+            const prompt = document.getElementById('llm-article-prompt').value.trim();
+            const level = document.getElementById('llm-article-level').value;
+            const length = document.getElementById('llm-article-length').value;
+            const isPublic = false; // No public checkbox in this form
+            const statusDiv = document.getElementById('llm-article-status');
+
+            if (!username || !sessionToken) {
+                alert('You must be logged in to create an article.');
+                return;
+            }
+
+            statusDiv.textContent = 'Generating article... Please wait.';
+
+            fetch('/api/article/llm', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    username,
+                    sessionToken,
+                    language,
+                    prompt,
+                    level,
+                    length,
+                    isPublic
+                })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success && data.id) {
+                    window.location.href = `article?id=${encodeURIComponent(data.id)}`;
+                } else {
+                    statusDiv.textContent = data.error || 'Failed to generate article.';
+                }
+            })
+            .catch(() => {
+                statusDiv.textContent = 'Failed to generate article.';
+            });
+        });
+    </script>
+</body>
+</html>
