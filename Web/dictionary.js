@@ -107,6 +107,60 @@ function setupDictionaryUI() {
                 document.getElementById('user-understanding').value = userData.understanding !== undefined ? userData.understanding : '';
                 document.getElementById('user-translation-form').style.display = '';
                 document.getElementById('user-phrase-form').style.display = 'none';
+
+                // Lingosia - Start: Anki deck lookup for single word
+                // Get language from cookie
+                const language = getCookie('language') || 'danish';
+                const ankiKey = 'ankiDeck_' + language;
+                let ankiDeck = [];
+                try {
+                    const ankiRaw = localStorage.getItem(ankiKey);
+                    if (ankiRaw) {
+                        ankiDeck = JSON.parse(ankiRaw);
+                    }
+                } catch {}
+                // Search for the word in all notes of all models
+                console.log(`Searching Anki deck for word "${cleanWord}" in language "${language}"`);
+                let ankiMatches = [];
+                if (ankiDeck && ankiDeck.length > 0) {
+                    ankiDeck.forEach(deck => {
+                        if (deck.notes && deck.fieldNames) {
+                            deck.notes.forEach(note => {
+                                // Check if cleanWord is a value in the note object (no regex, no cleaning)
+                                if (Object.values(note).some(val =>
+                                    typeof val === 'string' && val.toLowerCase().includes(cleanWord.toLowerCase())
+                                )) {
+                                    ankiMatches.push({
+                                        model: deck.name,
+                                        fields: note
+                                    });
+                                    console.log(`Found match in Anki deck "${deck.name}" for word "${cleanWord}":`, note);
+                                }
+                            });
+                        }
+                    });
+                }
+                // Display matches at the bottom of the dictionary pane
+                let ankiDiv = document.getElementById('anki-dictionary-results');
+                if (!ankiDiv) {
+                    ankiDiv = document.createElement('div');
+                    ankiDiv.id = 'anki-dictionary-results';
+                    ankiDiv.style.marginTop = '1em';
+                    dictDiv.parentNode.appendChild(ankiDiv);
+                }
+                if (ankiMatches.length > 0) {
+                    let html = '<div style="border-top:1px solid #ccc;margin-top:8px;padding-top:4px;font-size:90%"><b>Anki deck matches:</b><ul style="margin:0;padding-left:18px">';
+                    ankiMatches.forEach(match => {
+                        html += `<li><b>${match.model}</b>: `;
+                        html += Object.entries(match.fields).map(([k, v]) => `<span style="color:#555">${k}</span>: <span style="color:#222">${v}</span>`).join(', ');
+                        html += '</li>';
+                    });
+                    html += '</ul></div>';
+                    ankiDiv.innerHTML = html;
+                } else {
+                    ankiDiv.innerHTML = '';
+                }
+                // Lingosia - End
             }
         } else if (selectedWords.length > 1) {
             const phrase = selectedWords.map(w => w.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()?"']/g,"")).join(' ').toLowerCase();

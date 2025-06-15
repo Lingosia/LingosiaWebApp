@@ -1,0 +1,104 @@
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Lingosia | Anki Deck Load</title>
+
+    <link rel="stylesheet" type="text/css" href="apkg.css">
+    <link rel="stylesheet" type="text/css" href="c3.min.css">
+    <link rel="stylesheet" type="text/css" href="../style.css">
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js" charset="utf-8"></script>
+    <script src="https://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+
+    <script src="sql-wasm.js" charset="utf-8"></script>
+    <script src="c3.min.js" charset="utf-8"></script>
+    <script src="unzip.min.js" charset="utf-8"></script>
+    <script src="xregexp-all-min.js" charset="utf-8"></script>
+    <script src="underscore-min.js" charset="utf-8"></script>
+    <script src="apkg.js" charset="utf-8"></script>
+</head>
+
+<body>
+
+    <header id="main-header"></header>
+    <div id="container" style="padding: 20px;">
+        <div id="fileSelector">
+
+            Upload an Anki APKG file from your computer:><br>
+            <input type="file" id="ankiFile" name="files" accept=".apkg">
+            <!--
+                <li> <input type="checkbox" id="showImage"> Show images? (If checked, Images will be loaded, but <em>will cause long loading time for big files</em>.)
+            -->
+
+        </div>
+
+        <footer id="main-footer"></footer>
+
+        <script src="./header.js"></script>
+        <script src="./footer.js"></script>
+
+        
+        <div id="ankiLoadProgress"></div>
+        <div id="anki"></div>
+    </div>
+    <script>
+    // Helper to try loading image from IndexedDB
+    function tryLoadImageFromIndexedDB(img) {
+        if (img.dataset.triedIndexdb) return;
+        img.dataset.triedIndexdb = "1";
+        const src = img.getAttribute('src');
+        if (!src) return;
+        const filename = src.split('/').pop();
+        const openReq = indexedDB.open('lingosia');
+        openReq.onsuccess = function(e) {
+            const db = e.target.result;
+            const tx = db.transaction('images', 'readonly');
+            const store = tx.objectStore('images');
+            const getReq = store.get(filename);
+            getReq.onsuccess = function(ev) {
+                const result = ev.target.result;
+                if (result) {
+                    if (result instanceof Blob) {
+                        const reader = new FileReader();
+                        reader.onload = function(evt) {
+                            img.src = evt.target.result;
+                        };
+                        reader.readAsDataURL(result);
+                    } else if (typeof result === "string") {
+                        img.src = "data:image/png;base64," + result;
+                    }
+                }
+            };
+        };
+    }
+
+    // Observe new images and src changes
+    const observer = new MutationObserver(function(mutations) {
+        mutations.forEach(function(mutation) {
+            if (mutation.type === "childList") {
+                mutation.addedNodes.forEach(function(node) {
+                    if (node.tagName === "IMG") {
+                        tryLoadImageFromIndexedDB(node);
+                    } else if (node.querySelectorAll) {
+                        node.querySelectorAll('img').forEach(tryLoadImageFromIndexedDB);
+                    }
+                });
+            } else if (mutation.type === "attributes" && mutation.target.tagName === "IMG" && mutation.attributeName === "src") {
+                tryLoadImageFromIndexedDB(mutation.target);
+            }
+        });
+    });
+
+    // Start observing the whole document body
+    observer.observe(document.body, {
+        childList: true,
+        subtree: true,
+        attributes: true,
+        attributeFilter: ["src"]
+    });
+
+    // Also handle any images already present
+    document.querySelectorAll('img').forEach(tryLoadImageFromIndexedDB);
+    </script>
+</body>
+</html>

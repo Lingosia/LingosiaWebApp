@@ -140,3 +140,6 @@ Data/
 
 # Local development certificates
 certificates/
+
+# Local development files (excluded tools)
+xTools/
