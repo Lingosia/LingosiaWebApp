@@ -40,7 +40,7 @@ http.createServer(httpApp).listen(80, () => {
 app.use((req, res, next) => {
     if (req.headers.host.startsWith('www.')) {
         const newHost = req.headers.host.replace('www.', '');
-        res.redirect(301, `https://${newHost}${req.originalUrl}`);
+        res.redirect(`https://${newHost}${req.originalUrl}`);
     }
     else {
         next();
