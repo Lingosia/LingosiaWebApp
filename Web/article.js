@@ -48,6 +48,10 @@ function loadArticle(callback, id = null) {
             if (hasCJK(text)) {
                 text = insertSpacesBetweenCJK(text);
             }
+
+            // Remove any html tags
+            text = text.replace(/<\/?[^>]+(>|$)/g, "");
+
             document.getElementById('article').innerHTML = wrapWords(text);
             if (callback) callback();
         })
