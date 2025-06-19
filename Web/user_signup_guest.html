@@ -8,6 +8,7 @@
 </head>
 <body>
     <header id="main-header"></header>
+    <script src="header.js"></script>
     <div class="container">
         <div class="login-section login-centered">
             <h2 style="text-align: center;">Create Temporary Guest Account</h2>
@@ -15,25 +16,26 @@
                 <label for="language">Choose your language:</label>
                 <select id="language" name="language" required>
                     <option value="">Select a language</option>
-                    <option value="spanish">Spanish</option>
-                    <option value="french">French</option>
-                    <option value="german">German</option>
-                    <option value="italian">Italian</option>
-                    <option value="portuguese">Portuguese</option>
-                    <option value="russian">Russian</option>
-                    <option value="japanese">Japanese</option>
-                    <option value="chinese">Chinese</option>
-                    <option value="korean">Korean</option>
-                    <!-- Add more languages as needed -->
                 </select>
+                <script>
+                    window.addEventListener('DOMContentLoaded', function() {
+                        if (LANGUAGES && Array.isArray(LANGUAGES)) {
+                            const select = document.getElementById('language');
+                            LANGUAGES.forEach(lang => {
+                                const option = document.createElement('option');
+                                option.value = lang.code;
+                                option.textContent = lang.name;
+                                select.appendChild(option);
+                            });
+                        }
+                    });
+                </script>
                 <button type="submit">Continue as Guest</button>
                 <div id="status"></div>
             </form>
         </div>
     </div>
     <footer id="main-footer"></footer>
-
-    <script src="header.js"></script>
     <script src="footer.js"></script>
     <script>
         document.getElementById('guest-signup-form').addEventListener('submit', function(e) {

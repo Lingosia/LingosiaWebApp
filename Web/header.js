@@ -8,17 +8,36 @@ function getCookie(name) {
 const username = getCookie('username');
 const language = getCookie('language');
 
+// List of available languages with their flags (emoji or unicode)
+
+const LANGUAGES = [
+    { code: 'arabic', name: 'Arabic', flag: '🇸🇦' },
+    { code: 'chinese', name: 'Chinese', flag: '🇨🇳' },
+    { code: 'danish', name: 'Danish', flag: '🇩🇰' },
+    { code: 'dutch', name: 'Dutch', flag: '🇳🇱' },
+    { code: 'english', name: 'English', flag: '🇬🇧' },
+    { code: 'finnish', name: 'Finnish', flag: '🇫🇮' },
+    { code: 'french', name: 'French', flag: '🇫🇷' },
+    { code: 'german', name: 'German', flag: '🇩🇪' },
+    { code: 'greek', name: 'Greek', flag: '🇬🇷' },
+    { code: 'hebrew', name: 'Hebrew', flag: '🇮🇱' },
+    { code: 'italian', name: 'Italian', flag: '🇮🇹' },
+    { code: 'japanese', name: 'Japanese', flag: '🇯🇵' },
+    { code: 'korean', name: 'Korean', flag: '🇰🇷' },
+    { code: 'norwegian', name: 'Norwegian', flag: '🇳🇴' },
+    { code: 'polish', name: 'Polish', flag: '🇵🇱' },
+    { code: 'portuguese', name: 'Portuguese', flag: '🇵🇹' },
+    { code: 'russian', name: 'Russian', flag: '🇷🇺' },
+    { code: 'spanish', name: 'Spanish', flag: '🇪🇸' },
+    { code: 'swedish', name: 'Swedish', flag: '🇸🇪' },
+    { code: 'turkish', name: 'Turkish', flag: '🇹🇷' }
+];
+
 // Map language to flag emoji (add more as needed)
 function getFlag(lang) {
-    switch ((lang || '').toLowerCase()) {
-        case 'danish': return '🇩🇰';
-        case 'english': return '🇬🇧';
-        case 'japanese': return '🇯🇵';
-        case 'chinese': return '🇨🇳';
-        case 'spanish': return '🇪🇸';
-        case 'french': return '🇫🇷';
-        default: return '';
-    }
+    if (!lang) return '';
+    const languageObj = LANGUAGES.find(l => l.code === lang.toLowerCase());
+    return languageObj ? languageObj.flag : '';
 }
 
 document.getElementById('main-header').innerHTML = `

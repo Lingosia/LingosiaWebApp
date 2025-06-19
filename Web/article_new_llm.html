@@ -8,6 +8,7 @@
 </head>
 <body>
     <header id="main-header"></header>
+    <script src="header.js"></script>
     <div class="container">
         <div class="article-new-section login-centered" style="max-width:600px;">
             <h2>Automate New Article</h2>
@@ -43,14 +44,27 @@
                     Language:<br>
                     <select id="llm-article-language" required>
                         <option value="">Select a language</option>
-                        <option value="danish">Danish</option>
-                        <option value="english">English</option>
-                        <option value="japanese">Japanese</option>
-                        <option value="chinese">Chinese</option>
-                        <option value="spanish">Spanish</option>
-                        <option value="french">French</option>
-                        <!-- Add more as needed -->
                     </select>
+                    <script src="languages.js"></script>
+                    <script>
+                        // Populate language select from languages.js
+                        document.addEventListener('DOMContentLoaded', function() {
+                            if (typeof LANGUAGES !== 'undefined' && Array.isArray(LANGUAGES)) {
+                                const select = document.getElementById('llm-article-language');
+                                LANGUAGES.forEach(lang => {
+                                    const opt = document.createElement('option');
+                                    opt.value = lang.code || lang.value || (lang.name ? lang.name.toLowerCase() : '');
+                                    opt.textContent = lang.label || lang.name;
+                                    select.appendChild(opt);
+                                });
+                                // Set default language from cookie if available
+                                const langCookie = getCookie('language');
+                                if (langCookie) {
+                                    select.value = langCookie;
+                                }
+                            }
+                        });
+                    </script>
                 </label>
                 <br><br>
                 <label>
@@ -63,7 +77,6 @@
             <div id="llm-article-status" style="margin-top:1em;color:#14532d;"></div>
         </div>
     </div>
-    <script src="header.js"></script>
     <script>
         function getCookie(name) {
             const value = `; ${document.cookie}`;

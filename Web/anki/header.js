@@ -1,3 +1,5 @@
+import { languageFlags } from '../languages.js';
+
 function getCookie(name) {
     const value = `; ${document.cookie}`;
     const parts = value.split(`; ${name}=`);
@@ -10,15 +12,9 @@ const language = getCookie('language');
 
 // Map language to flag emoji (add more as needed)
 function getFlag(lang) {
-    switch ((lang || '').toLowerCase()) {
-        case 'danish': return '🇩🇰';
-        case 'english': return '🇬🇧';
-        case 'japanese': return '🇯🇵';
-        case 'chinese': return '🇨🇳';
-        case 'spanish': return '🇪🇸';
-        case 'french': return '🇫🇷';
-        default: return '';
-    }
+    if (!lang) return '';
+    const flag = languageFlags[lang.toLowerCase()];
+    return flag || '';
 }
 
 document.getElementById('main-header').innerHTML = `

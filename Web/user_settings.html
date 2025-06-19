@@ -8,6 +8,7 @@
 </head>
 <body>
     <header id="main-header"></header>
+    <script src="header.js"></script>
     <div id = "settings-container">
             <h2>Settings</h2>
             <form id="settings-form">
@@ -15,14 +16,19 @@
                     Chosen Language:<br>
                     <select id="settings-language">
                         <option value="">Select a language</option>
-                        <option value="danish">Danish</option>
-                        <option value="english">English</option>
-                        <option value="japanese">Japanese</option>
-                        <option value="chinese">Chinese</option>
-                        <option value="spanish">Spanish</option>
-                        <option value="french">French</option>
-                        <!-- Add more as needed -->
                     </select>
+                    <script>
+                        // Assumes languages.js defines a global array: window.languages = [{code: 'danish', name: 'Danish'}, ...]
+                        if (LANGUAGES && Array.isArray(LANGUAGES)) {
+                            const select = document.getElementById('settings-language');
+                            LANGUAGES.forEach(lang => {
+                                const opt = document.createElement('option');
+                                opt.value = lang.code;
+                                opt.textContent = lang.name;
+                                select.appendChild(opt);
+                            });
+                        }
+                    </script>
                 </label>
             </form>
 
@@ -30,9 +36,8 @@
             <h2>Load Anki Deck</h2>
             <a href="anki/index.html" class="dict-btn">Load Anki Deck</a>
     </div>
-    <footer id="main-footer"></footer>
 
-    <script src="header.js"></script>
+    <footer id="main-footer"></footer>
     <script src="footer.js"></script>
     <script>
         // Prefill username/email from cookies or localStorage if available
@@ -74,12 +79,6 @@
             .catch(err => console.error('Error updating language:', err));
         });
 
-        document.getElementById('logout-btn').addEventListener('click', function() {
-            document.cookie = 'username=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC;';
-            document.cookie = 'sessionToken=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC;';
-            document.cookie = 'language=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC;';
-            window.location.href = 'index';
-        });
     </script>
 
 </body>

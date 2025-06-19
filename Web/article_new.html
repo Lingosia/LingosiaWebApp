@@ -8,6 +8,7 @@
 </head>
 <body>
     <header id="main-header"></header>
+    <script src="header.js"></script>
     <div class="container">
         <div class="article-new-section">
             <h2>Create New Article</h2>
@@ -21,14 +22,26 @@
                     Language:<br>
                     <select id="article-language" required>
                         <option value="">Select a language</option>
-                        <option value="danish">Danish</option>
-                        <option value="english">English</option>
-                        <option value="japanese">Japanese</option>
-                        <option value="chinese">Chinese</option>
-                        <option value="spanish">Spanish</option>
-                        <option value="french">French</option>
-                        <!-- Add more as needed -->
                     </select>
+                    <script>
+                        // Populate language dropdown from languages.js
+                        document.addEventListener('DOMContentLoaded', function() {
+                            if (LANGUAGES && Array.isArray(LANGUAGES)) {
+                                const select = document.getElementById('article-language');
+                                LANGUAGES.forEach(lang => {
+                                    const option = document.createElement('option');
+                                    option.value = lang.value || lang.code || lang.name.toLowerCase();
+                                    option.textContent = lang.value || lang.code || lang.name;
+                                    select.appendChild(option);
+                                });
+                                // Set default language from cookie if available
+                                const lang = getCookie('language');
+                                if (lang) {
+                                    select.value = lang;
+                                }
+                            }
+                        });
+                    </script>
                 </label>
                 <br><br>
                 <label>
@@ -44,7 +57,6 @@
             </form>
         </div>
     </div>
-    <script src="header.js"></script>
     <script>
         function getCookie(name) {
             const value = `; ${document.cookie}`;

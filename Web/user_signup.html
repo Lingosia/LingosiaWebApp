@@ -8,6 +8,7 @@
 </head>
 <body>
     <header id="main-header"></header>
+    <script src="header.js"></script>
     <div class="container">
         <div class="login-section login-centered">
             <h2>Sign Up</h2>
@@ -36,14 +37,20 @@
                     Chosen Language:<br>
                     <select id="signup-language" required>
                         <option value="">Select a language</option>
-                        <option value="danish">Danish</option>
-                        <option value="english">English</option>
-                        <option value="japanese">Japanese</option>
-                        <option value="chinese">Chinese</option>
-                        <option value="spanish">Spanish</option>
-                        <option value="french">French</option>
-                        <!-- Add more as needed -->
                     </select>
+                    <script>
+                        window.addEventListener('DOMContentLoaded', function() {
+                            if (LANGUAGES && Array.isArray(LANGUAGES)) {
+                                const select = document.getElementById('signup-language');
+                                LANGUAGES.forEach(lang => {
+                                    const option = document.createElement('option');
+                                    option.value = lang.code;
+                                    option.textContent = lang.name;
+                                    select.appendChild(option);
+                                });
+                            }
+                        });
+                    </script>
                 </label>
                 <br><br>
                 <button type="submit" class="dict-btn">Sign Up</button>
@@ -54,8 +61,6 @@
         </div>
     </div>
     <footer id="main-footer"></footer>
-
-    <script src="header.js"></script>
     <script src="footer.js"></script>
     <script>
         async function sha256(str) {
