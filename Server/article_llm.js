@@ -1,18 +1,13 @@
 const { BedrockRuntimeClient, InvokeModelCommand } = require("@aws-sdk/client-bedrock-runtime");
 
-// You may want to configure AWS credentials and region via environment variables or AWS config files.
-
-
 async function generateArticle({ prompt, language, level, length }) {
-    // Compose a prompt for the LLM
     const fullPrompt = `
         Write an article in ${language} at CEFR level ${level} with a ${length.toLowerCase()} length.
         Topic: ${prompt}
         Return only the article text.
     `;
 
-    // Example modelId for Bedrock (adjust as needed)
-    const modelId = process.env.BEDROCK_MODEL_ID || "mistral.mixtral-8x7b-instruct-v0:1"; // or another available model
+    const modelId = process.env.BEDROCK_MODEL_ID || "mistral.mixtral-8x7b-instruct-v0:1";
     const client = new BedrockRuntimeClient({ region: process.env.AWS_REGION || "us-east-1" });
 
     const body = JSON.stringify({
@@ -34,7 +29,6 @@ async function generateArticle({ prompt, language, level, length }) {
     try {
         const response = await client.send(command);
         const responseBody = JSON.parse(new TextDecoder().decode(response.body));
-        // For Claude, the completion is in responseBody.completion
         return responseBody.outputs[0].text || "";
     } catch (err) {
         console.error("AWS Bedrock LLM error:", err);
