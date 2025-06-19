@@ -125,6 +125,69 @@ utils = {
             console.error(`Error retrieving rate limit for IP ${ipAddress}:`, e);
             return { limit: 0, remaining: 0, reset: 0 };
         }
+    },
+
+    async getAiLimit(ipAddress) {
+        // Retrieve AI usage limit data for the IP address from ip_addresses.json
+        const dbPath = path.join(__dirname, '../Data/ip_addresses.json');
+        if (!fs.existsSync(dbPath)) {
+            // If the file does not exist, create it with an empty object
+            fs.writeFileSync(dbPath, '{}');
+        }
+        const db = new JsonDB(new Config(dbPath, true, true, '/'));
+        try {
+            // Check if the IP address exists in the database
+            let ipLimit = {
+                limit: 0,
+                remaining: 0,
+                reset: 0
+            };
+            if (!await db.exists(`/${ipAddress}`)) {
+                // If the IP address does not exist, create it with default AI usage values
+                ipLimit = {
+                    limit: 10, // Default limit for AI usage
+                    remaining: 10, // Default remaining AI usage
+                    reset: Date.now() + (3600000 * 24) // Reset after 24 hours
+                };
+                await db.push(`/${ipAddress}`, { aiLimit: ipLimit });
+            }
+            // Retrieve the AI usage limit data for the IP address
+            const ipData = await db.getData(`/${ipAddress}`);
+
+            if (!ipData.aiLimit) {
+                ipLimit = {
+                    limit: 0,
+                    remaining: 0,
+                    reset: 0
+                };
+                await db.push(`/${ipAddress}/aiLimit`, ipLimit);
+            }
+
+            // Check if AI usage limit is expired
+            if (ipData.aiLimit.reset < Date.now()) {
+                // Reset AI usage limit
+                ipData.aiLimit.limit = 10; // Reset to default limit
+                ipData.aiLimit.remaining = 10; // Reset remaining AI usage
+                ipData.aiLimit.reset = Date.now() + (3600000 * 24); // Reset after 24 hours
+                await db.push(`/${ipAddress}/aiLimit`, ipData.aiLimit);
+            }
+
+            // Consume one AI usage attempt
+            if (ipData.aiLimit.remaining > 0) {
+                ipData.aiLimit.remaining -= 1;
+                await db.push(`/${ipAddress}/aiLimit`, ipData.aiLimit);
+            }
+
+            return {
+                limit: ipData.aiLimit.limit || 0,
+                remaining: ipData.aiLimit.remaining || 0,
+                reset: ipData.aiLimit.reset || 0
+            };
+        }
+        catch (e) {
+            console.error(`Error retrieving AI limit for IP ${ipAddress}:`, e);
+            return { limit: 0, remaining: 0, reset: 0 };
+        }
     }
 
 };

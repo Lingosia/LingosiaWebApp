@@ -152,8 +152,6 @@ module.exports = function (app) {
         } catch (e) {
             return res.status(500).json({ error: 'Could not save article metadata.' });
         }
-
-        res.json({ success: true, id: guid });
     }
 
     function getAllArticles() {
@@ -331,7 +329,6 @@ module.exports = function (app) {
         await deleteArticle(idx, res);
     });
 
-    // POST /api/article/llm
     app.post('/api/article/llm', async (req, res) => {
         const { username, sessionToken, language, prompt, level, length, isPublic } = req.body;
         if (!username || !sessionToken || !language || !prompt || !level || !length) {
@@ -341,6 +338,13 @@ module.exports = function (app) {
         if (!utils.isSessionValid(username, sessionToken)) {
             res.status(403).json({ error: 'Invalid session.' });
             return;
+        }
+
+        // Get AI limit by ip
+        const ipAddress = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
+        const userLimit = await utils.getAiLimit(ipAddress);
+        if (userLimit.remaining <= 0) {
+            return res.status(429).json({ error: 'Rate limit exceeded. Please try again tomorrow.' });
         }
 
         const title = `${prompt} (${level}, ${length})`;
