@@ -13,6 +13,13 @@ module.exports = function(app) {
             return res.status(400).json({ error: 'Missing required fields.' });
         }
 
+        // Rate limit attempts by IP address
+        const ipAddress = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
+        const ipLimit = await utils.getIpAddressLimit(ipAddress);
+        if (ipLimit.remaining <= 0) {
+            return res.status(429).json({ error: 'Too many authentication actions from this IP address. Please try again later.' });
+        }
+
         // Alow only alphanumeric usernames
         const usernameRegex = /^[a-zA-Z0-9_]+$/;
         if (!usernameRegex.test(username)) {
@@ -87,9 +94,16 @@ module.exports = function(app) {
             return res.status(400).json({ error: 'Missing required fields.' });
         }
 
+        // Rate limit attempts by IP address
+        const ipAddress = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
+        const ipLimit = await utils.getIpAddressLimit(ipAddress);
+        if (ipLimit.remaining <= 0) {
+            return res.status(429).json({ error: 'Too many authentication actions from this IP address. Please try again later.' });
+        }
+
         // Rate limit login attempts
         const rateLimit = await utils.getLoginAttemptLimit(username);
-        if (rateLimit.remaining <= 0) {
+        if (rateLimit.remaining <= 0 && rateLimit.reset > Date.now()) {
             return res.status(429).json({ error: 'Too many login attempts. Please try again later.' });
         }
 
@@ -169,6 +183,13 @@ module.exports = function(app) {
         const { language } = req.body;
         if (!language) {
             return res.status(400).json({ error: 'Missing language.' });
+        }
+
+        // Rate limit attempts by IP address
+        const ipAddress = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
+        const ipLimit = await utils.getIpAddressLimit(ipAddress);
+        if (ipLimit.remaining <= 0) {
+            return res.status(429).json({ error: 'Too many authentication actions from this IP address. Please try again later.' });
         }
 
         // Generate a GUID for the guest user
