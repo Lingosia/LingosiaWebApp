@@ -87,6 +87,12 @@ module.exports = function(app) {
             return res.status(400).json({ error: 'Missing required fields.' });
         }
 
+        // Rate limit login attempts
+        const rateLimit = await utils.getLoginAttemptLimit(username);
+        if (rateLimit.remaining <= 0) {
+            return res.status(429).json({ error: 'Too many login attempts. Please try again later.' });
+        }
+
         const db = new JsonDB(new Config(path.join(__dirname, '../Data/users'), true, true, '/'));
         let user;
         try {
