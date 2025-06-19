@@ -4,6 +4,21 @@ module.exports = function(app) {
     const { JsonDB, Config } = require('node-json-db');
     const crypto = require('crypto');
 
+    async function isSessionValid(username, sessionToken) {
+
+        const dbPath = path.join(__dirname, '../Data/users.json');
+        if (!fs.existsSync(dbPath)) {
+            return false;
+        }
+        const db = new JsonDB(new Config(dbPath, true, true, '/'));
+        try {
+            const user = await db.getData(`/${username}`);
+            return user.sessionToken === sessionToken;
+        } catch (e) {
+            return false;
+        }
+    }
+
     // Signup endpoint
     app.post('/api/signup', async(req, res) => {
         const { username, email, passwordHash, language } = req.body;
@@ -133,7 +148,11 @@ module.exports = function(app) {
             return res.status(404).json({ error: 'User not found.' });
         }
 
-        // Optionally: Validate sessionToken here (not implemented for brevity)
+        //Validate sessionToken here
+        if (!(await isSessionValid(username, sessionToken))) {
+            return res.status(401).json({ error: 'Invalid session token.' });
+        }
+
         user.language = language;
         db.push(`/${username}`, user, false);
 
@@ -188,7 +207,6 @@ module.exports = function(app) {
         } catch (e) {
             // If DB is empty, ignore error
         }
-
 
         // Generate a session token (random 32 bytes hex)
         const sessionToken = crypto.randomBytes(32).toString('hex');
