@@ -1,3 +1,6 @@
+const utils = require('./utils.js');
+const { JsonDB, Config } = require('node-json-db');
+
 module.exports = function(app) {
     const fs = require('fs');
     const path = require('path');
@@ -9,28 +12,24 @@ module.exports = function(app) {
             return res.status(400).json({ error: 'Missing required fields.' });
         }
 
-        // Optionally: Validate sessionToken here (not implemented for brevity)
+        // Validate session token
+        if (!utils.isSessionValid(username, sessionToken)) {
+            return res.status(401).json({ error: 'Invalid session token.' });
+        }
 
-        // Load or create user data file
+        // Use JsonDB to store user data
         const userDataDir = path.join(__dirname, '../Data/Dictionaries');
         if (!fs.existsSync(userDataDir)) {
             fs.mkdirSync(userDataDir, { recursive: true });
         }
-        const userDataPath = path.join(userDataDir, `${username}_${language}.json`);
-        let data = {};
-        try {
-            if (fs.existsSync(userDataPath)) {
-                data = JSON.parse(fs.readFileSync(userDataPath, 'utf8'));
-            }
-        } catch (e) {
-            data = {};
-        }
+        const userDataPath = path.join(userDataDir, `${username}_${language}`);
 
-        // Update or add the word/phrase
-        data[wordOrPhrase] = { translation, understanding };
+        // Initialize JsonDB for this user's language dictionary
+        const db = new JsonDB(new Config(userDataPath, true, true, '/'));
 
         try {
-            fs.writeFileSync(userDataPath, JSON.stringify(data, null, 2), 'utf8');
+            // Set or update the word/phrase entry
+            db.push(`/${wordOrPhrase}`, { translation, understanding }, true);
             res.json({ success: true });
         } catch (e) {
             res.status(500).json({ error: 'Could not save word.' });
