@@ -1,4 +1,5 @@
 const llm = require('./article_llm.js');
+const utils = require('./utils.js');
 
 module.exports = function (app) {
     const fs = require('fs');
@@ -38,21 +39,6 @@ module.exports = function (app) {
                 res.send(data);
             }
         });
-    }
-
-    async function isSessionValid(username, sessionToken) {
-
-        const dbPath = path.join(__dirname, '../Data/users.json');
-        if (!fs.existsSync(dbPath)) {
-            return false;
-        }
-        const db = new JsonDB(new Config(dbPath, true, true, '/'));
-        try {
-            const user = await db.getData(`/${username}`);
-            return user.sessionToken === sessionToken;
-        } catch (e) {
-            return false;
-        }
     }
 
     function validateNewArticleInput({ username, sessionToken, title, content, isPublic, language }, res) {
@@ -253,7 +239,7 @@ module.exports = function (app) {
     app.post('/api/article/new', (req, res) => {
         const { username, sessionToken, title, content, isPublic, language } = req.body;
 
-        if (!isSessionValid(username, sessionToken)) {
+        if (!utils.isSessionValid(username, sessionToken)) {
             res.status(403).json({ error: 'Invalid session.' });
             return;
         }
@@ -279,7 +265,7 @@ module.exports = function (app) {
     app.post('/api/articles', async (req, res) => {
         const { username, sessionToken } = req.body;
 
-        if (!isSessionValid(username, sessionToken)) {
+        if (!utils.isSessionValid(username, sessionToken)) {
             res.status(403).json({ error: 'Invalid session.' });
             return;
         }
@@ -306,7 +292,7 @@ module.exports = function (app) {
             return res.status(400).json({ error: 'Missing required fields.' });
         }
 
-        if (!isSessionValid(username, sessionToken)) {
+        if (!utils.isSessionValid(username, sessionToken)) {
             res.status(403).json({ error: 'Invalid session.' });
             return;
         }
@@ -326,7 +312,7 @@ module.exports = function (app) {
             return res.status(400).json({ error: 'Missing required fields.' });
         }
 
-        if (!isSessionValid(username, sessionToken)) {
+        if (!utils.isSessionValid(username, sessionToken)) {
             res.status(403).json({ error: 'Invalid session.' });
             return;
         }
@@ -352,7 +338,7 @@ module.exports = function (app) {
             return res.status(400).json({ error: 'Missing required fields.' });
         }
 
-        if (!isSessionValid(username, sessionToken)) {
+        if (!utils.isSessionValid(username, sessionToken)) {
             res.status(403).json({ error: 'Invalid session.' });
             return;
         }

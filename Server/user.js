@@ -1,23 +1,10 @@
+const utils = require('./utils.js');
+
 module.exports = function(app) {
     const fs = require('fs');
     const path = require('path');
     const { JsonDB, Config } = require('node-json-db');
     const crypto = require('crypto');
-
-    async function isSessionValid(username, sessionToken) {
-
-        const dbPath = path.join(__dirname, '../Data/users.json');
-        if (!fs.existsSync(dbPath)) {
-            return false;
-        }
-        const db = new JsonDB(new Config(dbPath, true, true, '/'));
-        try {
-            const user = await db.getData(`/${username}`);
-            return user.sessionToken === sessionToken;
-        } catch (e) {
-            return false;
-        }
-    }
 
     // Signup endpoint
     app.post('/api/signup', async(req, res) => {
@@ -149,7 +136,7 @@ module.exports = function(app) {
         }
 
         //Validate sessionToken here
-        if (!(await isSessionValid(username, sessionToken))) {
+        if (!(await utils.isSessionValid(username, sessionToken))) {
             return res.status(401).json({ error: 'Invalid session token.' });
         }
 
