@@ -43,7 +43,8 @@ module.exports = function(app) {
         // Generate a random salt
         const salt = crypto.randomBytes(16).toString('hex');
         // Rehash the password with the salt
-        const rehashedPassword = crypto.pbkdf2Sync(passwordHash, salt, 100000, 64, 'sha512').toString('hex');
+        var bufferedPassword = Buffer.from(passwordHash, 'hex');
+        const rehashed = crypto.pbkdf2Sync(Buffer.from(bufferedPassword, 'hex'), user.salt, 100000, 64, 'sha512').toString('hex');
 
         // Check if directory exists, if not create it
         const userDataDir = path.join(__dirname, '../Data/');
@@ -116,7 +117,8 @@ module.exports = function(app) {
         }
 
         // Rehash the provided passwordHash with the stored salt
-        const rehashed = crypto.pbkdf2Sync(passwordHash, user.salt, 100000, 64, 'sha512').toString('hex');
+        var bufferedPassword= Buffer.from(passwordHash, 'hex');
+        const rehashed = crypto.pbkdf2Sync(Buffer.from(bufferedPassword, 'hex'), user.salt, 100000, 64, 'sha512').toString('hex');
 
         if (rehashed === user.rehashedPassword) {
             user.sessionToken = crypto.randomBytes(32).toString('hex');
